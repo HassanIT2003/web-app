@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        VERCEL_TOKEN = 'qIoz7FEytLh7oYB1KKkU354d'
+        VERCEL_TOKEN = 'qIoz7FEytLh7oYB1KKkU354d' // Ideally, use credentials for security
     }
 
     stages {
@@ -18,7 +18,7 @@ pipeline {
                 script {
                     sh '''
                         python -m venv venv
-                        venv/Scripts/Activate.ps1
+                        source venv/bin/activate
                         pip install -r requirements.txt
                     '''
                 }
@@ -30,7 +30,7 @@ pipeline {
                 script {
                     // Run tests using pytest
                     sh '''
-                        venv/bin/Activate.ps1
+                        source venv/bin/activate
                         pytest
                     '''
                 }
@@ -41,16 +41,13 @@ pipeline {
             steps {
                 script {
                     sh '''
-                    curl -fsSL https://cli.vercel.com/install | bash
-                    '''
-                    }
-                    script {
-                        sh '''
+                        npm install -g vercel
                         vercel --prod --token $VERCEL_TOKEN
-                        '''
-                    }
+                    '''
                 }
+            }
         }
+    }
 
     post {
         success {
@@ -61,6 +58,6 @@ pipeline {
         }
         always {
             echo 'Pipeline finished!'
-        }
-    }
+        }
+    }
 }
