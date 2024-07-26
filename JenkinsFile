@@ -1,0 +1,66 @@
+pipeline {
+    agent any
+
+    environment {
+        VERCEL_TOKEN = 'qIoz7FEytLh7oYB1KKkU354d'
+    }
+
+    stages {
+        stage('Source') {
+            steps {
+                // Clone the repository
+                git 'https://github.com/HassanIT2003/web-app.git'
+            }
+        }
+
+        stage('Build') {
+            steps {
+                script {
+                    sh '''
+                        python -m venv venv
+                        venv/Scripts/Activate.ps1
+                        pip install -r requirements.txt
+                    '''
+                }
+            }
+        }
+
+        stage('Test') {
+            steps {
+                script {
+                    // Run tests using pytest
+                    sh '''
+                        venv/bin/Activate.ps1
+                        pytest
+                    '''
+                }
+            }
+        }
+
+        stage('Deploy') {
+            steps {
+                script {
+                    sh '''
+                    curl -fsSL https://cli.vercel.com/install | bash
+                    '''
+                    }
+                    script {
+                        sh '''
+                        vercel --prod --token $VERCEL_TOKEN
+                        '''
+                    }
+                }
+        }
+
+    post {
+        success {
+            echo 'Pipeline succeeded!'
+        }
+        failure {
+            echo 'Pipeline failed!'
+        }
+        always {
+            echo 'Pipeline finished!'
+        }
+    }
+}
